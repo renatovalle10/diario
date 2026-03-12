@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RVOTECH - Diário do Agricultor</title>
+    <style>
+        :root { 
+            --agro: #1b5e20; 
+            --agro-light: #4caf50;
+            --accent: #fbc02d; 
+            --bg: #e9ecef; 
+            --text: #333;
+            --danger: #d32f2f;
+            --warning: #f57c00;
+            --info: #0288d1;
+        }
+        
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text); }
+        
+        .container-principal { max-width: 900px; margin: 0 auto; }
+
+        header { background: var(--agro); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
+        header h1 { margin: 0; font-size: 1.8rem; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Container Vertical */
+        .vertical-container { 
+            display: flex; 
+            flex-direction: column; /* Empilha os blocos um abaixo do outro */
+            gap: 20px; 
+            padding-bottom: 20px;
+        }
+
+        /* Colunas (Cards) */
+        .card-col { 
+            background: white; 
+            border-radius: 12px; 
+            padding: 25px; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            border-top: 5px solid var(--agro-light);
+        }
+
+        /* Destaque para cards específicos */
+        .card-ticket { border-top-color: var(--danger); }
+        .card-pluvio { border-top-color: var(--info); }
+        .card-estimativa { border-top-color: var(--accent); background-color: #fffdf0; }
+
+        h3 { color: var(--agro); font-size: 1.2rem; margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        
+        .grid-2-col { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; } /* Organiza campos lado a lado dentro do bloco */
+        @media (max-width: 600px) { .grid-2-col { grid-template-columns: 1fr; } } /* Responsivo para celular */
+
+        label { display: block; font-size: 0.85rem; font-weight: bold; margin-top: 15px; color: #555; }
+        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-family: inherit; font-size: 0.95rem; }
+        input:focus, select:focus, textarea:focus { border-color: var(--agro); outline: none; box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2); }
+        
+        /* Tabela Excel */
+        .excel-section { margin-top: 25px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); overflow-x: auto; border-top: 5px solid #333; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 1200px; }
+        th { background: #e8f5e9; color: var(--agro); border: 1px solid #c8e6c9; padding: 12px; text-align: left; position: sticky; top: 0; }
+        td { border: 1px solid #eee; padding: 10px; }
+        tr:nth-child(even) { background: #fafafa; }
+        tr:hover { background: #f1f8e9; }
+
+        /* Botões e Tags */
+        .btn-main { background: var(--agro); color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1.1rem; margin-top: 20px; transition: 0.3s; text-transform: uppercase; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+        .btn-main:hover { background: #124015; transform: translateY(-2px); }
+        
+        .badge { padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; color: white; display: inline-block; }
+        .sev-baixa { background: #4caf50; }
+        .sev-media { background: var(--warning); }
+        .sev-alta { background: #e64a19; }
+        .sev-critica { background: var(--danger); }
+    </style>
+</head>
+<body>
+
+<div class="container-principal">
+    <header>
+        <h1>RVOTECH - Diário do Agricultor</h1>
+        <p style="margin: 5px 0 0 0; font-size: 0.9rem; color: #c8e6c9;">Monitoramento Integrado PAS Soja</p>
+    </header>
+
+    <form id="diarioForm">
+        <div class="vertical-container">
+            
+            <div class="card-col">
+                <h3>1. Planejamento e Plantio</h3>
+                <div class="grid-2-col">
+                    <div>
+                        <label>Plantio Direto (SPD)?</label>
+                        <select id="spd"><option>Sim</option><option>Não</option></select>
+                    </div>
+                    <div>
+                        <label>Talhão e Topografia</label>
+                        <input type="text" id="talhao" placeholder="Ex: T1 - Plano">
+                    </div>
+                    <div>
+                        <label>Cultivar / Variedade</label>
+                        <input type="text" id="cultivar" placeholder="Ex: M8001 RR">
+                    </div>
+                    <div>
+                        <label>Ciclo e Resistência</label>
+                        <select id="ciclo"><option>Precoce</option><option>Médio</option><option>Tardio</option></select>
+                    </div>
+                </div>
+                <label>Data de Semeadura</label>
+                <input type="date" id="dataSem">
+                <label>Ocorrências no Plantio</label>
+                <textarea id="obsPlantio" rows="2" placeholder="Descreva problemas com sementes, palhada, etc."></textarea>
+            </div>
+
+            <div class="card-col">
+                <h3>2. Solo e Nutrição</h3>
+                <div class="grid-2-col">
+                    <div>
+                        <label>Correção (Calcário/Gesso)</label>
+                        <input type="text" id="correcao" placeholder="Ex: 2t/ha Calcário">
+                    </div>
+                    <div>
+                        <label>Adubação (P e K)</label>
+                        <input type="text" id="adubacao" placeholder="Ex: 02-20-20">
+                    </div>
+                    <div>
+                        <label>Inoculação (Bradyrhizobium)</label>
+                        <select id="inoculacao"><option>Sim</option><option>Não</option></select>
+                    </div>
+                    <div>
+                        <label>Outras Aplicações (Micros)</label>
+                        <input type="text" id="outrosNutri" placeholder="Ex: Boro, Zinco, Cobalto">
+                    </div>
+                </div>
+                <label>Ocorrências no Solo</label>
+                <textarea id="obsSolo" rows="2" placeholder="Compactação, erosão, deficiências visíveis..."></textarea>
+            </div>
+
+            <div class="card-col">
+                <h3>3. Monitoramento (MIP/MID)</h3>
+                <div class="grid-2-col">
+                    <div>
+                        <label>MIP (Lagartas/Percevejos por m)</label>
+                        <input type="text" id="mip" placeholder="Ex: 2 percevejos/m">
+                    </div>
+                    <div>
+                        <label>MID (Doenças / Ferrugem)</label>
+                        <input type="text" id="mid" placeholder="Ex: Sem esporos / Vazio respeitado">
+                    </div>
+                    <div>
+                        <label>Plantas Daninhas</label>
+                        <input type="text" id="daninhas" placeholder="Ex: Buva, Capim-amargoso">
+                    </div>
+                    <div>
+                        <label>Químicos e Receituário</label>
+                        <input type="text" id="quimicos" placeholder="Ex: Glifosato 2L/ha">
+                    </div>
+                </div>
+                <label>Ocorrências Fitossanitárias</label>
+                <textarea id="obsMoni" rows="2" placeholder="Descreva manchas, ataques atípicos..."></textarea>
+            </div>
+
+            <div class="card-col card-pluvio">
+                <h3 style="color: var(--info); border-color: var(--info);">4. Controle Pluviométrico</h3>
+                <div class="grid-2-col">
+                    <div>
+                        <label>Data da Leitura</label>
+                        <input type="date" id="dataChuva">
+                    </div>
+                    <div>
+                        <label>Volume de Chuva (mm)</label>
+                        <input type="number" id="volChuva" step="0.5" placeholder="Ex: 25.5">
+                    </div>
+                </div>
+                <label>Intensidade / Distribuição</label>
+                <select id="intensidadeChuva">
+                    <option>Chuva Fina / Bem distribuída</option>
+                    <option>Pancada Rápida</option>
+                    <option>Tempestade / Risco de Erosão</option>
+                    <option>Granizo</option>
+                </select>
+                <label>Observações Climáticas</label>
+                <textarea id="obsChuva" rows="2" placeholder="Impacto na lavoura, alagamentos..."></textarea>
+            </div>
+
+            <div class="card-col card-ticket">
+                <h3 style="color: var(--danger); border-color: var(--danger);">5. Ticket de Ocorrência</h3>
+                <div class="grid-2-col">
+                    <div>
+                        <label>Severidade do Problema</label>
+                        <select id="severidade">
+                            <option value="Baixa">🟢 Baixa (Apenas registro)</option>
+                            <option value="Média">🟡 Média (Atenção necessária)</option>
+                            <option value="Alta">🟠 Alta (Ação imediata recomendada)</option>
+                            <option value="Crítica">🔴 Crítica (Risco severo de perda)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Título da Ocorrência</label>
+                        <input type="text" id="ticketTitulo" placeholder="Ex: Quebra da plantadeira">
+                    </div>
+                </div>
+                <label>Descrição Detalhada</label>
+                <textarea id="ticketDesc" rows="3" placeholder="Descreva exatamente o que aconteceu e as ações tomadas..."></textarea>
+            </div>
+
+            <div class="card-col card-estimativa">
+                <h3 style="color: #f9a825; border-color: #f9a825;">📊 Estimativa de Safra</h3>
+                <div class="grid-2-col">
+                    <div>
+                        <label>Plantas por Metro</label>
+                        <input type="number" id="estPlantas" value="12">
+                    </div>
+                    <div>
+                        <label>Vagens por Planta</label>
+                        <input type="number" id="estVagens" value="40">
+                    </div>
+                    <div>
+                        <label>Grãos por Vagem</label>
+                        <input type="number" id="estGraos" value="2.5" step="0.1">
+                    </div>
+                    <div>
+                        <label>Peso 1000 sementes (g)</label>
+                        <input type="number" id="estPMS" value="160">
+                    </div>
+                </div>
+                <label>Espaçamento (m)</label>
+                <input type="number" id="estEspaco" value="0.45" step="0.05">
+                
+                <button type="button" class="btn-main" onclick="registrarDiario()">GRAVAR NO EXCEL ↓</button>
+            </div>
+
+        </div>
+    </form>
+
+    <div class="excel-section">
+        <h3>📂 Caderno de Campo Digital (Excel)</h3>
+        <table id="tabelaExcel">
+            <thead>
+                <tr>
+                    <th>Data Reg.</th>
+                    <th>Talhão</th>
+                    <th>Cultivar</th>
+                    <th>SPD</th>
+                    <th>Chuva (mm)</th>
+                    <th>Ticket (Ocorrência)</th>
+                    <th>Status Severidade</th>
+                    <th>Produtividade Est. (sc/ha)</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function calcularProdutividade() {
+        const pl = parseFloat(document.getElementById('estPlantas').value) || 0;
+        const vg = parseFloat(document.getElementById('estVagens').value) || 0;
+        const gr = parseFloat(document.getElementById('estGraos').value) || 0;
+        const pms = parseFloat(document.getElementById('estPMS').value) || 0;
+        const esp = parseFloat(document.getElementById('estEspaco').value) || 0;
+        
+        if(esp === 0) return 0;
+        
+        const formula = (pl * vg * gr * pms) / (esp * 600);
+        return formula.toFixed(1);
+    }
+
+    function obterBadgeSeveridade(valor) {
+        if (!valor) return "-";
+        let classe = "sev-baixa";
+        if (valor === "Média") classe = "sev-media";
+        if (valor === "Alta") classe = "sev-alta";
+        if (valor === "Crítica") classe = "sev-critica";
+        
+        return `<span class="badge ${classe}">${valor.toUpperCase()}</span>`;
+    }
+
+    function registrarDiario() {
+        const tabela = document.getElementById("tabelaExcel").getElementsByTagName('tbody')[0];
+        const novaLinha = tabela.insertRow(0); 
+        
+        const dataAtual = new Date().toLocaleDateString('pt-BR');
+        const scHa = calcularProdutividade();
+        const chuva = document.getElementById('volChuva').value;
+        const severidade = document.getElementById('severidade').value;
+        const tituloTicket = document.getElementById('ticketTitulo').value;
+
+        const dadosLinha = [
+            dataAtual,
+            document.getElementById('talhao').value || "-",
+            document.getElementById('cultivar').value || "-",
+            document.getElementById('spd').value,
+            chuva ? chuva + " mm" : "-",
+            tituloTicket || "Sem ocorrências",
+            obterBadgeSeveridade(severidade),
+            scHa + " sc/ha"
+        ];
+
+        dadosLinha.forEach((dado, index) => {
+            let celula = novaLinha.insertCell(index);
+            celula.innerHTML = dado;
+            
+            if (index === 7) {
+                celula.style.fontWeight = "bold";
+                celula.style.color = "var(--agro)";
+                celula.style.fontSize = "1.1rem";
+            }
+        });
+
+        document.getElementById('volChuva').value = "";
+        document.getElementById('ticketTitulo').value = "";
+        document.getElementById('ticketDesc').value = "";
+        document.getElementById('obsMoni').value = "";
+        
+        alert("Registro gravado com sucesso no Caderno Digital!");
+    }
+</script>
+
+</body>
+</html>
